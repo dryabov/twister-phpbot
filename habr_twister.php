@@ -1,15 +1,6 @@
 <?php
 
-set_time_limit(0);
 mb_internal_encoding('UTF-8');
-chdir(__DIR__);
-
-function debugLog($msg)
-{
-    file_put_contents('./logrss.txt', "$msg\n", FILE_APPEND);
-}
-
-/**/debugLog("\n\n\n=== " . date("Y-m-d H:i:s") . "===");
 
 // Load RSS feed
 $feed_uri = 'http://habrahabr.ru/rss/hubs/new/';
@@ -22,8 +13,6 @@ $twister = new TwisterPost('habr_ru');
 
 // Set path to twisterd directory
 $twister->twisterPath = '.' . DIRECTORY_SEPARATOR . 'twister-win32-bundle' . DIRECTORY_SEPARATOR;
-// Note: we use custom rpc port for twister
-$twister->rpcport = 40001;
 
 // Initialise RSS database
 require_once 'habrrssdb.php';
@@ -42,10 +31,7 @@ foreach ($rss->channel->item as $item) {
 
     $msg = $twister->prettyPrint($title, $link, isset($item->category) ? $item->category : null);
 
-/**/debugLog($msg);
     if ($twister->postMessage($msg)) {
         $db->setPublished($id);
     }
 }
-
-/**/debugLog('=== Done ===');
