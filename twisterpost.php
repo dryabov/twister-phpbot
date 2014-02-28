@@ -97,7 +97,7 @@ class TwisterPost
         }
 
         $k = $this->maxId + 1;
-        $text = '"' . str_replace('"', '\\"', $text) . '"';
+        $text = escapeshellarg($text);
         $result = $this->runRpcCommand('newpostmsg', "{$this->user} $k $text");
         if (isset($result->code) && $result->code < 0) {
             $this->maxId = -1;
