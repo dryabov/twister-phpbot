@@ -1,6 +1,7 @@
 <?php
 
 mb_internal_encoding('UTF-8');
+setlocale(LC_CTYPE, 'en_US.UTF-8');
 
 // Load RSS feed
 $feed_uri = 'http://habrahabr.ru/rss/hubs/new/';
