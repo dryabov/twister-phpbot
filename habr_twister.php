@@ -22,6 +22,8 @@ $db = new HabrRSSDb('habr_db.dat');
 foreach ($rss->channel->item as $item) {
     $link  = (string)$item->link;
     $title = (string)$item->title;
+    // Note: habrahabr.ru does both special chars encoding and CDATA wrap
+    $title = htmlspecialchars_decode($title);
 
     // get post id from link
     $id = (int)preg_replace('#[^\d]#', '', $link);
