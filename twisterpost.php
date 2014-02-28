@@ -105,10 +105,8 @@ class TwisterPost
         return true;
     }
 
-    public function prettyPrint($title, $url = '', $tags = null)
+    public function prettyPrint($title, $url = '', $tags = null, $maxLen = 140)
     {
-        $maxLen = 140;
-
         $title_len = mb_strlen($title);
         $url_len  = mb_strlen($url);
 
