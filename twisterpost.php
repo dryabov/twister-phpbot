@@ -113,24 +113,20 @@ class TwisterPost
         $url_len  = mb_strlen($url);
 
         if ($url_len === 0) {
-
             if ($title_len > $maxLen) {
                 $text = rtrim(mb_substr($title, 0, $maxLen - 1), ' ') . '…';
             } else {
                 $text = $title;
             }
-
         } else if ($title_len + 1 + $url_len > $maxLen) {
-
             $text = rtrim(mb_substr($title, 0, $maxLen - 2 - $url_len), ' ') . '… ' . $url;
-
         } else {
-
             $text = $title . ' ' . $url;
-            if (isset($tags)) {
-                foreach ($tags as $tag) {
-                    $text .= ' #' . str_replace(' ', '_', (string)$tag);
-                }
+        }
+
+        if (isset($tags)) {
+            foreach ($tags as $tag) {
+                $text .= ' #' . str_replace(' ', '_', (string)$tag);
             }
             $text = mb_substr($text, 0, $maxLen + 1);
             $pos = $maxLen;
@@ -138,7 +134,6 @@ class TwisterPost
                 $pos--;
             }
             $text = mb_substr($text, 0, $pos);
-
         }
 
         return $text;
