@@ -13,6 +13,10 @@ class TwisterPost
 
     protected $maxId = -1;
 
+    // see updateSeenHashtags in https://github.com/miguelfreitas/twister-core/blob/master/src/twister.cpp
+    protected $hashBreakChars = " \n\t.,:/?!";
+
+
     public function __construct($user)
     {
         $this->user = $user;
@@ -124,7 +128,13 @@ class TwisterPost
 
         if (isset($tags)) {
             foreach ($tags as $tag) {
-                $text .= ' #' . str_replace(' ', '_', (string)$tag);
+                $tagText = (string)$tag;
+                $tagText = strtr($tagText, $this->hashBreakChars, str_repeat('_', strlen($this->hashBreakChars)));
+                $tagText = trim($tagText, '_');
+                $tagText = preg_replace('#(?<=_)_+#', '', $tagText);
+                if (!empty($tagText)) {
+                    $text .= ' #' . $tagText;
+                }
             }
             $text = mb_substr($text, 0, $maxLen + 1);
             $pos  = mb_strrpos($text, ' ');
