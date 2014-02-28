@@ -29,6 +29,9 @@ foreach ($rss->channel->item as $item) {
         continue;
     }
 
+    // short URL [-6 chars do matter]
+    $link = str_replace('habrahabr.ru', 'habr.ru', $link);
+    $link = rtrim($link, '/');
     $msg = $twister->prettyPrint($title, $link, isset($item->category) ? $item->category : null);
 
     if ($twister->postMessage($msg)) {
