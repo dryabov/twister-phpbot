@@ -129,10 +129,7 @@ class TwisterPost
                 $text .= ' #' . str_replace(' ', '_', (string)$tag);
             }
             $text = mb_substr($text, 0, $maxLen + 1);
-            $pos = $maxLen;
-            while (mb_substr($text, $pos, 1) !== ' ') {
-                $pos--;
-            }
+            $pos  = mb_strrpos($text, ' ');
             $text = mb_substr($text, 0, $pos);
         }
 
