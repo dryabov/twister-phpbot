@@ -10,7 +10,7 @@ if (!$rss) die('Cannot read rss');
 
 // Initialise TwisterPost
 require_once 'twisterpost.php';
-$twister = new TwisterPost('habr_ru');
+$twister = new TwisterPost('habr_ru'); // set user name
 
 // Set path to twisterd directory
 $twister->twisterPath = '.' . DIRECTORY_SEPARATOR . 'twister-win32-bundle' . DIRECTORY_SEPARATOR;
@@ -30,9 +30,10 @@ foreach ($rss->channel->item as $item) {
         continue;
     }
 
-    // short URL [-6 chars do matter]
+    // shorten URL [-6 chars do matter]
     $link = str_replace('habrahabr.ru', 'habr.ru', $link);
     $link = rtrim($link, '/');
+
     $msg = $twister->prettyPrint($title, $link, isset($item->category) ? $item->category : null);
 
     if ($twister->postMessage($msg)) {
