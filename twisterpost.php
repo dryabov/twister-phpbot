@@ -62,9 +62,9 @@ class TwisterPost
             $this->lastError = $result;
             return false;
         }
-        if (isset($result[0])) {
-            if (isset($result[0]->userpost->k)) {
-                $this->maxId = $result[0]->userpost->k;
+        foreach($result as $item) {
+            if (isset($item->userpost->n) && $item->userpost->n === $this->user) {
+                $this->maxId = $item->userpost->k;
             }
         }
 
@@ -74,12 +74,14 @@ class TwisterPost
             $this->lastError = $result;
             return false;
         }
-        if (isset($result[0]) && isset($result[0]->p)) {
-            if (isset($result[0]->p->seq)) {
-                $this->maxId = max($this->maxId, $result[0]->p->seq);
-            }
-            if (isset($result[0]->p->v) && isset($result[0]->p->v->userpost) && isset($result[0]->p->v->userpost->k)) {
-                $this->maxId = max($this->maxId, $result[0]->p->v->userpost->k);
+        foreach($result as $item) {
+            if (isset($item->sig_user) && isset($item->p) && $item->sig_user === $this->user) {
+                if (isset($item->p->seq)) {
+                    $this->maxId = max($this->maxId, $item->p->seq);
+                }
+                if (isset($item->p->v) && isset($item->p->v->userpost) && isset($item->p->v->userpost->k)) {
+                    $this->maxId = max($this->maxId, $item->p->v->userpost->k);
+                }
             }
         }
 
