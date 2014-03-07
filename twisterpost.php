@@ -101,7 +101,7 @@ class TwisterPost
         $k = $this->maxId + 1;
         $text = escapeshellarg($text);
         $result = $this->runRpcCommand('newpostmsg', "{$this->user} $k $text");
-        if (isset($result->code) && $result->code < 0) {
+        if (!isset($result->userpost) || !isset($result->userpost->k) || ($result->userpost->k != $k)) {
             $this->maxId = -1;
             $this->lastError = $result;
             return false;
