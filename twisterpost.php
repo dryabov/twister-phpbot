@@ -150,7 +150,7 @@ class TwisterPost
 
     protected function exec_win($cmd, &$output = null, &$return_var = null)
     {
-        $tempfile = '_php_exec.bat';
+        $tempfile = uniqid().'_php_exec.bat';
 
         $bat = "@echo off\r\n"
             . "@chcp 65001 >nul\r\n"
