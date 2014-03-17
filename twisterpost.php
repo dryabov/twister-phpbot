@@ -138,9 +138,11 @@ class TwisterPost
                     $text .= ' #' . $tagText;
                 }
             }
-            $text = mb_substr($text, 0, $maxLen + 1);
-            $pos  = mb_strrpos($text, ' ');
-            $text = mb_substr($text, 0, $pos);
+            if(mb_strlen($text) > $maxLen) {
+                $text = mb_substr($text, 0, $maxLen + 1);
+                $pos  = mb_strrpos($text, ' ');
+                $text = mb_substr($text, 0, $pos);
+            }
         }
 
         return $text;
