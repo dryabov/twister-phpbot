@@ -29,7 +29,12 @@ class TwisterPost
         $request->method = $method;
         $request->params = $params;
 
-        $request_json = json_encode($request);
+        if (defined('JSON_UNESCAPED_UNICODE')) { // PHP 5.4+:
+            $request_json = json_encode($request, JSON_UNESCAPED_UNICODE);
+        } else { // PHP 5.3:
+            $request_json = json_encode($request);
+            $request_json = preg_replace_callback('/\\\\u([0-9a-f]{4})/i', function($matches){return mb_convert_encoding(pack('H*', $matches[1]), 'UTF-8', 'UTF-16');}, $request_json);
+        }
 
         $ch = curl_init();
         $url = "http://{$this->rpchost}:{$this->rpcport}/";
