@@ -4,9 +4,10 @@ mb_internal_encoding('UTF-8');
 setlocale(LC_CTYPE, 'en_US.UTF-8');
 
 // Load RSS feed
+require_once 'rssreader.php';
 $feed_uri = 'http://habrahabr.ru/rss/hubs/new/';
-$rss = simplexml_load_file($feed_uri);
-if (!$rss) die('Cannot read rss');
+$rss = getRssFeed($feed_uri);
+if (!$rss) die('Cannot read rss or it is up to date');
 
 // Initialise TwisterPost
 require_once 'twisterpost.php';
