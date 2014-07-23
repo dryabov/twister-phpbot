@@ -16,8 +16,8 @@ $twister = new TwisterPost('habr_ru'); // set user name
 $twister->twisterPath = '.' . DIRECTORY_SEPARATOR . 'twister-win32-bundle' . DIRECTORY_SEPARATOR;
 
 // Initialise RSS database
-require_once 'habrrssdb.php';
-$db = new HabrRSSDb('habr_db.dat');
+require_once 'rssdb.php';
+$db = new RSSDb('habr_ru.dat');
 
 foreach ($rss->channel->item as $item) {
     $link  = (string)$item->link;
