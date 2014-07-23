@@ -11,10 +11,7 @@ if (!$rss) die('Cannot read rss or it is up to date');
 
 // Initialise TwisterPost
 require_once 'twisterpost.php';
-$twister = new TwisterPost('habr_ru'); // set user name
-
-// Set path to twisterd directory
-$twister->twisterPath = '.' . DIRECTORY_SEPARATOR . 'twister-win32-bundle' . DIRECTORY_SEPARATOR;
+$twister = new TwisterPost('habr_ru');
 
 // Initialise RSS database
 require_once 'rssdb.php';

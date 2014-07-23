@@ -4,61 +4,74 @@ class TwisterPost
 {
     public $user = '';
 
-    public $twisterPath = '';
     public $rpcuser = 'user';
     public $rpcpassword = 'pwd';
+    public $rpchost = '127.0.0.1';
     public $rpcport = 28332;
 
     public $lastError = null;
 
-    protected $maxId = -1;
+    protected $maxId = false;
 
     // see updateSeenHashtags in https://github.com/miguelfreitas/twister-core/blob/master/src/twister.cpp
     protected $hashBreakChars = " \n\t.,:/?!";
-
 
     public function __construct($user)
     {
         $this->user = $user;
     }
 
-    protected function getRpcCommand($method, $params = '')
+    public function runRpcCommand($method, $params = array())
     {
-        $twisterd_path = $this->twisterPath . "twisterd";
-        $twisterd_path .= " -rpcuser={$this->rpcuser}";
-        $twisterd_path .= " -rpcpassword={$this->rpcpassword}";
-        $twisterd_path .= " -rpcport={$this->rpcport}";
-        $twisterd_path .= " $method";
-        if (!empty($params)) {
-            $twisterd_path .= " $params";
+        $request = new stdClass;
+        $request->jsonrpc = '2.0';
+        $request->id = uniqid('', true);
+        $request->method = $method;
+        $request->params = $params;
+
+        $request_json = json_encode($request);
+
+        $ch = curl_init();
+        $url = "http://{$this->rpchost}:{$this->rpcport}/";
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Authorization: Basic ' . base64_encode($this->rpcuser . ':' . $this->rpcpassword),
+                'Content-Type: application/json; charset=utf-8'
+        ));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $request_json);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+        $response_json = curl_exec($ch);
+
+        if (curl_errno($ch) || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+            curl_close($ch);
+            return false;
         }
 
-        return $twisterd_path;
-    }
+        curl_close( $ch );
 
-    public function runRpcCommand($method, $params = '')
-    {
-        $cmd = $this->getRpcCommand($method, $params);
+        $response = json_decode($response_json);
 
-        $result = null;
-        if (strncasecmp(PHP_OS, 'WIN', 3) == 0) {
-            $this->exec_win($cmd, $result);
-        } else {
-            exec($cmd, $result);
+        if (!is_object( $response ) ||
+            (isset( $response->error ) && !is_null($response->error)) ||
+            !isset( $response->result ) || !isset( $response->id ) || $response->id !== $request->id)
+        {
+            return false;
         }
-        $result = json_decode(implode(' ', $result));
 
-        return $result;
+        return $response->result;
     }
 
     public function updateMaxId()
     {
         $this->lastError = null;
-        $this->maxId = 0;
+        $this->maxId = -1;
 
-        $result = $this->runRpcCommand('getposts', "1 '[{\"username\":\"{$this->user}\"}]'");
-        if (isset($result->code) && $result->code < 0) {
-            $this->maxId = -1;
+        $result = $this->runRpcCommand('getposts', array(1, array(array('username' => $this->user))));
+        if ($result === false || (isset($result->code) && $result->code < 0)) {
+            $this->maxId = false;
             $this->lastError = $result;
             return false;
         }
@@ -68,9 +81,9 @@ class TwisterPost
             }
         }
 
-        $result = $this->runRpcCommand('dhtget', "{$this->user} status s");
-        if (isset($result->code) && $result->code < 0) {
-            $this->maxId = -1;
+        $result = $this->runRpcCommand('dhtget', array($this->user, 'status', 's'));
+        if ($result === false || (isset($result->code) && $result->code < 0)) {
+            $this->maxId = false;
             $this->lastError = $result;
             return false;
         }
@@ -92,17 +105,16 @@ class TwisterPost
     {
         $this->lastError = null;
 
-        if ($this->maxId < 0) {
+        if ($this->maxId === false) {
             if (!$this->updateMaxId()) {
                 return false;
             }
         }
 
         $k = $this->maxId + 1;
-        $text = escapeshellarg($text);
-        $result = $this->runRpcCommand('newpostmsg', "{$this->user} $k $text");
+        $result = $this->runRpcCommand('newpostmsg', array($this->user, $k, $text));
         if (!isset($result->userpost) || !isset($result->userpost->k) || ($result->userpost->k != $k)) {
-            $this->maxId = -1;
+            $this->maxId = false;
             $this->lastError = $result;
             return false;
         }
@@ -146,21 +158,5 @@ class TwisterPost
         }
 
         return $text;
-    }
-
-    protected function exec_win($cmd, &$output = null, &$return_var = null)
-    {
-        $tempfile = uniqid().'_php_exec.bat';
-
-        $bat = "@echo off\r\n"
-            . "@chcp 65001 >nul\r\n"
-            . "@cd \"" . getcwd() . "\"\r\n"
-            . "$cmd\r\n";
-
-        file_put_contents($tempfile, $bat);
-        exec("start /b cmd /c $tempfile", $output, $return_var);
-        unlink($tempfile);
-
-        return count($output) ? $output[count($output) - 1] : '';
     }
 }
