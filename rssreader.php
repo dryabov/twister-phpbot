@@ -34,7 +34,7 @@ function getRssFeed($feed_uri, $reload = false)
 		$value = trim($h[1]);
 		if (!isset($headers_arr[$key]))
 			$headers_arr[$key] = $value;
-		elseif (is_array($headers[$key]))
+		elseif (is_array($headers_arr[$key]))
 			$headers_arr[$key][] = $value;
 		else
 			$headers_arr[$key] = array($headers_arr[$key], $value);
