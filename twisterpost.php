@@ -9,6 +9,8 @@ class TwisterPost
     public $rpchost = '127.0.0.1';
     public $rpcport = 28332;
 
+    public $timeout = 60; // timeout (in seconds)
+
     public $lastError = null;
 
     protected $maxId = false;
@@ -47,6 +49,8 @@ class TwisterPost
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->timeout);
 
         $response_json = curl_exec($ch);
 
